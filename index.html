@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Puasa Ramadhan 2026 - WIB</title>
+    <style>
+        :root {
+            --primary-color: #059669;
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .card {
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-title {
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .selector-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        select {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2 class="header-title">Jadwal Imsakiyah Ramadhan 1447 H</h2>
+        <p class="subtitle">Estimasi: 19 Februari - 18 Maret 2026</p>
+
+        <div class="selector-group">
+            <label for="citySelect"><strong>Pilih Kota (WIB):</strong></label>
+            <select id="citySelect">
+                <option value="Jakarta">DKI Jakarta - Jakarta</option>
+                <option value="Medan">Sumatera Utara - Medan</option>
+                <option value="Bandung">Jawa Barat - Bandung</option>
+                <option value="Semarang">Jawa Tengah - Semarang</option>
+                <option value="Surabaya">Jawa Timur - Surabaya</option>
+                <option value="Padang">Sumatera Barat - Padang</option>
+                <option value="Palembang">Sumatera Selatan - Palembang</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal Masehi</th>
+                        <th>Imsak</th>
+                        <th>Subuh</th>
+                        <th>Zuhur</th>
+                        <th>Ashar</th>
+                        <th>Maghrib</th>
+                        <th>Isya</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const citySelect = document.getElementById('citySelect');
+        const scheduleBody = document.getElementById('scheduleBody');
+
+        // Fungsi untuk mengambil data dari API
+        async function fetchJadwal(city) {
+            // Tampilkan pesan loading saat data sedang diambil
+            scheduleBody.innerHTML = '<tr><td colspan="7" class="loading">Mengambil data jadwal...</td></tr>';
+
+            // URL API: Tahun 1447 Hijriah, Bulan 9 (Ramadhan), Metode 20 (Kemenag RI)
+            const url = `https://api.aladhan.com/v1/hijriCalendarByCity/1447/9?city=${city}&country=Indonesia&method=20`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const days = data.data;
+
+                let tableHTML = '';
+
+                days.forEach(day => {
+                    const date = day.date.gregorian.date; // Tanggal masehi (DD-MM-YYYY)
+                    const timings = day.timings;
+
+                    // API mengembalikan waktu dengan zona waktu, misal "04:30 (WIB)". Kita potong ambil jamnya saja.
+                    const cleanTime = (timeStr) => timeStr.split(' ')[0];
+
+                    tableHTML += `<tr>
+                        <td>${date}</td>
+                        <td>${cleanTime(timings.Imsak)}</td>
+                        <td>${cleanTime(timings.Fajr)}</td>
+                        <td>${cleanTime(timings.Dhuhr)}</td>
+                        <td>${cleanTime(timings.Asr)}</td>
+                        <td><strong>${cleanTime(timings.Maghrib)}</strong></td>
+                        <td>${cleanTime(timings.Isha)}</td>
+                    </tr>`;
+                });
+
+                scheduleBody.innerHTML = tableHTML;
+
+            } catch (error) {
+                scheduleBody.innerHTML = '<tr><td colspan="7" style="color:red;">Gagal memuat data. Periksa koneksi internet Anda.</td></tr>';
+            }
+        }
+
+        // Jalankan saat kota diubah
+        citySelect.addEventListener('change', (e) => {
+            fetchJadwal(e.target.value);
+        });
+
+        // Jalankan pertama kali saat web dibuka
+        fetchJadwal(citySelect.value);
+    </script>
+</body>
+</html>
