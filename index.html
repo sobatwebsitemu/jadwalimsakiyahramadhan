@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jadwal Puasa Ramadhan 2026 - WIB</title>
+    <title>Jadwal Puasa Ramadhan 1447 H / 2026 M</title>
     <style>
         :root {
-            --primary-color: #059669;
+            --primary-color: #059669; /* Warna hijau modern */
             --bg-color: #f3f4f6;
             --text-color: #1f2937;
             --border-color: #e5e7eb;
@@ -25,10 +25,10 @@
         .card {
             background: white;
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
         }
 
         .header-title {
@@ -44,29 +44,49 @@
         }
 
         .selector-group {
-            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 600px) {
+            .selector-group {
+                grid-template-columns: 1fr; /* Tumpuk ke bawah di HP */
+            }
+        }
+
+        .input-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         select {
             padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
             outline: none;
             cursor: pointer;
+            background-color: white;
+        }
+
+        select:disabled {
+            background-color: #f9fafb;
+            cursor: not-allowed;
         }
 
         .table-container {
             overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            white-space: nowrap;
         }
 
         th, td {
@@ -85,11 +105,16 @@
             background-color: #f9fafb;
         }
 
-        .loading {
+        .message {
             text-align: center;
-            padding: 20px;
-            font-weight: bold;
+            padding: 30px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .loading {
             color: var(--primary-color);
+            font-weight: bold;
         }
     </style>
 </head>
@@ -100,16 +125,19 @@
         <p class="subtitle">Estimasi: 19 Februari - 18 Maret 2026</p>
 
         <div class="selector-group">
-            <label for="citySelect"><strong>Pilih Kota (WIB):</strong></label>
-            <select id="citySelect">
-                <option value="Jakarta">DKI Jakarta - Jakarta</option>
-                <option value="Medan">Sumatera Utara - Medan</option>
-                <option value="Bandung">Jawa Barat - Bandung</option>
-                <option value="Semarang">Jawa Tengah - Semarang</option>
-                <option value="Surabaya">Jawa Timur - Surabaya</option>
-                <option value="Padang">Sumatera Barat - Padang</option>
-                <option value="Palembang">Sumatera Selatan - Palembang</option>
-            </select>
+            <div class="input-group">
+                <label for="provinsiSelect"><strong>1. Pilih Provinsi:</strong></label>
+                <select id="provinsiSelect">
+                    <option value="">Memuat provinsi...</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="kotaSelect"><strong>2. Pilih Kota/Kabupaten:</strong></label>
+                <select id="kotaSelect" disabled>
+                    <option value="">-- Pilih Provinsi Dahulu --</option>
+                </select>
+            </div>
         </div>
 
         <div class="table-container">
@@ -126,36 +154,74 @@
                     </tr>
                 </thead>
                 <tbody id="scheduleBody">
-                    </tbody>
+                    <tr>
+                        <td colspan="7" class="message">Silakan pilih provinsi dan kota untuk melihat jadwal.</td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        const citySelect = document.getElementById('citySelect');
+        const provinsiSelect = document.getElementById('provinsiSelect');
+        const kotaSelect = document.getElementById('kotaSelect');
         const scheduleBody = document.getElementById('scheduleBody');
 
-        // Fungsi untuk mengambil data dari API
-        async function fetchJadwal(city) {
-            // Tampilkan pesan loading saat data sedang diambil
-            scheduleBody.innerHTML = '<tr><td colspan="7" class="loading">Mengambil data jadwal...</td></tr>';
+        // 1. Mengambil data Provinsi dari API Wilayah Indonesia
+        async function fetchProvinsi() {
+            try {
+                const response = await fetch('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json');
+                const provinces = await response.json();
+                
+                provinsiSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+                provinces.forEach(prov => {
+                    provinsiSelect.innerHTML += `<option value="${prov.id}">${prov.name}</option>`;
+                });
+            } catch (error) {
+                provinsiSelect.innerHTML = '<option value="">Gagal memuat provinsi</option>';
+            }
+        }
 
-            // URL API: Tahun 1447 Hijriah, Bulan 9 (Ramadhan), Metode 20 (Kemenag RI)
-            const url = `https://api.aladhan.com/v1/hijriCalendarByCity/1447/9?city=${city}&country=Indonesia&method=20`;
+        // 2. Mengambil data Kota berdasarkan ID Provinsi
+        async function fetchKota(provinceId) {
+            kotaSelect.innerHTML = '<option value="">Memuat kota...</option>';
+            kotaSelect.disabled = true;
+
+            try {
+                const response = await fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${provinceId}.json`);
+                const regencies = await response.json();
+                
+                kotaSelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+                regencies.forEach(kota => {
+                    kotaSelect.innerHTML += `<option value="${kota.name}">${kota.name}</option>`;
+                });
+                kotaSelect.disabled = false;
+            } catch (error) {
+                kotaSelect.innerHTML = '<option value="">Gagal memuat kota</option>';
+            }
+        }
+
+        // 3. Mengambil jadwal dari API Aladhan
+        async function fetchJadwal(cityName) {
+            scheduleBody.innerHTML = '<tr><td colspan="7" class="message loading">Mengambil jadwal puasa...</td></tr>';
+
+            // Menghapus kata "KABUPATEN" atau "KOTA" agar API Aladhan lebih mudah membaca lokasinya
+            const cleanCityName = cityName.replace(/^(KOTA |KABUPATEN )/i, '');
+            const url = `https://api.aladhan.com/v1/hijriCalendarByCity/1447/9?city=${cleanCityName}&country=Indonesia&method=20`;
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
+                
+                if (data.code !== 200) throw new Error("Data tidak ditemukan");
+                
                 const days = data.data;
-
                 let tableHTML = '';
 
                 days.forEach(day => {
-                    const date = day.date.gregorian.date; // Tanggal masehi (DD-MM-YYYY)
+                    const date = day.date.gregorian.date; 
                     const timings = day.timings;
-
-                    // API mengembalikan waktu dengan zona waktu, misal "04:30 (WIB)". Kita potong ambil jamnya saja.
-                    const cleanTime = (timeStr) => timeStr.split(' ')[0];
+                    const cleanTime = (timeStr) => timeStr.split(' ')[0]; // Membuang zona waktu (WIB/WITA/WIT)
 
                     tableHTML += `<tr>
                         <td>${date}</td>
@@ -171,17 +237,31 @@
                 scheduleBody.innerHTML = tableHTML;
 
             } catch (error) {
-                scheduleBody.innerHTML = '<tr><td colspan="7" style="color:red;">Gagal memuat data. Periksa koneksi internet Anda.</td></tr>';
+                scheduleBody.innerHTML = '<tr><td colspan="7" style="color:red; text-align:center; padding:20px;">Gagal memuat jadwal untuk kota ini. Coba kota terdekat.</td></tr>';
             }
         }
 
-        // Jalankan saat kota diubah
-        citySelect.addEventListener('change', (e) => {
-            fetchJadwal(e.target.value);
+        // Event Listeners
+        provinsiSelect.addEventListener('change', (e) => {
+            const provinceId = e.target.value;
+            if (provinceId) {
+                fetchKota(provinceId);
+                scheduleBody.innerHTML = '<tr><td colspan="7" class="message">Silakan pilih kota/kabupaten.</td></tr>';
+            } else {
+                kotaSelect.innerHTML = '<option value="">-- Pilih Provinsi Dahulu --</option>';
+                kotaSelect.disabled = true;
+            }
         });
 
-        // Jalankan pertama kali saat web dibuka
-        fetchJadwal(citySelect.value);
+        kotaSelect.addEventListener('change', (e) => {
+            const cityName = e.target.value;
+            if (cityName) {
+                fetchJadwal(cityName);
+            }
+        });
+
+        // Muat provinsi saat halaman pertama kali dibuka
+        fetchProvinsi();
     </script>
 </body>
 </html>
