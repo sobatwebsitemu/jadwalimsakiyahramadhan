@@ -6,7 +6,7 @@
     <title>Jadwal Puasa Ramadhan 1447 H / 2026 M</title>
     <style>
         :root {
-            --primary-color: #059669; /* Warna hijau modern */
+            --primary-color: #059669;
             --bg-color: #f3f4f6;
             --text-color: #1f2937;
             --border-color: #e5e7eb;
@@ -52,7 +52,7 @@
 
         @media (max-width: 600px) {
             .selector-group {
-                grid-template-columns: 1fr; /* Tumpuk ke bawah di HP */
+                grid-template-columns: 1fr;
             }
         }
 
@@ -167,33 +167,35 @@
         const kotaSelect = document.getElementById('kotaSelect');
         const scheduleBody = document.getElementById('scheduleBody');
 
-        // 1. Mengambil data Provinsi dari API Wilayah Indonesia
+        // 1. Mengambil data Provinsi dari Ibnux
         async function fetchProvinsi() {
             try {
-                const response = await fetch('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json');
+                const response = await fetch('https://ibnux.github.io/data-indonesia/provinsi.json');
                 const provinces = await response.json();
                 
                 provinsiSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
                 provinces.forEach(prov => {
-                    provinsiSelect.innerHTML += `<option value="${prov.id}">${prov.name}</option>`;
+                    // Menggunakan .nama sesuai format Ibnux
+                    provinsiSelect.innerHTML += `<option value="${prov.id}">${prov.nama}</option>`;
                 });
             } catch (error) {
                 provinsiSelect.innerHTML = '<option value="">Gagal memuat provinsi</option>';
             }
         }
 
-        // 2. Mengambil data Kota berdasarkan ID Provinsi
+        // 2. Mengambil data Kota dari Ibnux
         async function fetchKota(provinceId) {
             kotaSelect.innerHTML = '<option value="">Memuat kota...</option>';
             kotaSelect.disabled = true;
 
             try {
-                const response = await fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${provinceId}.json`);
+                const response = await fetch(`https://ibnux.github.io/data-indonesia/kabupaten/${provinceId}.json`);
                 const regencies = await response.json();
                 
                 kotaSelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
                 regencies.forEach(kota => {
-                    kotaSelect.innerHTML += `<option value="${kota.name}">${kota.name}</option>`;
+                    // Menggunakan .nama sesuai format Ibnux
+                    kotaSelect.innerHTML += `<option value="${kota.nama}">${kota.nama}</option>`;
                 });
                 kotaSelect.disabled = false;
             } catch (error) {
@@ -205,8 +207,8 @@
         async function fetchJadwal(cityName) {
             scheduleBody.innerHTML = '<tr><td colspan="7" class="message loading">Mengambil jadwal puasa...</td></tr>';
 
-            // Menghapus kata "KABUPATEN" atau "KOTA" agar API Aladhan lebih mudah membaca lokasinya
-            const cleanCityName = cityName.replace(/^(KOTA |KABUPATEN )/i, '');
+            // Menghapus kata "Kab." atau "Kota" agar API Aladhan lebih mudah membaca lokasinya
+            const cleanCityName = cityName.replace(/^(Kab\. |Kota )/i, '');
             const url = `https://api.aladhan.com/v1/hijriCalendarByCity/1447/9?city=${cleanCityName}&country=Indonesia&method=20`;
 
             try {
@@ -221,7 +223,7 @@
                 days.forEach(day => {
                     const date = day.date.gregorian.date; 
                     const timings = day.timings;
-                    const cleanTime = (timeStr) => timeStr.split(' ')[0]; // Membuang zona waktu (WIB/WITA/WIT)
+                    const cleanTime = (timeStr) => timeStr.split(' ')[0]; 
 
                     tableHTML += `<tr>
                         <td>${date}</td>
@@ -241,7 +243,6 @@
             }
         }
 
-        // Event Listeners
         provinsiSelect.addEventListener('change', (e) => {
             const provinceId = e.target.value;
             if (provinceId) {
@@ -260,7 +261,6 @@
             }
         });
 
-        // Muat provinsi saat halaman pertama kali dibuka
         fetchProvinsi();
     </script>
 </body>
