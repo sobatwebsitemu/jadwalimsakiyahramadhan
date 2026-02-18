@@ -1,184 +1,231 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jadwal Imsakiyah Pekanbaru 1447 H - Fix</title>
-
-
+    <title>Jadwal Imsakiyah Otomatis 1447 H</title>
+    
     <script src="https://unpkg.com/adhan@4.4.3/lib/bundles/adhan.umd.js"></script>
-
+    
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0fdf4;
-            color: #1f2937;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
+        :root {
+            --primary-green: #065f46;
+            --light-green: #ecfdf5;
+            --accent-orange: #d97706;
+            --text-main: #1f2937;
+            --white: #ffffff;
         }
 
-        .container {
-            background: white;
-            max-width: 900px;
-            width: 100%;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            background-color: #f3f4f6; 
+            color: var(--text-main); 
+            margin: 0;
+            padding: 10px;
+            display: flex; 
+            justify-content: center; 
         }
 
-        h1 {
-            text-align: center;
-            color: #047857;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #6b7280;
-            margin-bottom: 30px;
-            font-size: 0.95rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            overflow: hidden;
-            border-radius: 8px;
+        .container { 
+            background: var(--white); 
+            max-width: 900px; 
+            width: 100%; 
+            padding: 20px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             margin-top: 20px;
         }
 
-        th,
-        td {
-            padding: 12px 15px;
+        h1 { 
+            text-align: center; 
+            color: var(--primary-green); 
+            margin-bottom: 5px;
+            font-size: 1.5rem;
+        }
+
+        .subtitle { 
+            text-align: center; 
+            color: #6b7280; 
+            margin-bottom: 25px; 
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 600px;
+        }
+
+        th { 
+            background-color: var(--primary-green); 
+            color: var(--white); 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            font-size: 0.75rem; 
+            letter-spacing: 0.05em;
+            padding: 15px;
+            position: sticky;
+            top: 0;
+        }
+
+        td { 
+            padding: 14px; 
+            text-align: center; 
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.9rem;
+        }
+
+        tr:nth-child(even) { background-color: #fafafa; }
+        tr:hover { background-color: var(--light-green); }
+
+        .date-col { text-align: left; font-weight: 600; color: #374151; }
+        .highlight { font-weight: bold; color: var(--accent-orange); background: #fffbeb; }
+        .maghrib { font-weight: 800; color: var(--primary-green); }
+
+        #status-message {
             text-align: center;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        th {
-            background-color: #059669;
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9fafb;
-        }
-
-        tr:hover {
-            background-color: #ecfdf5;
-        }
-
-        strong {
-            color: #047857;
-        }
-
-        .highlight {
-            font-weight: bold;
-            color: #d97706;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-style: italic;
+            color: var(--accent-orange);
         }
     </style>
 </head>
-
 <body>
 
-    <div class="container">
+<div class="container">
+    <div id="status-message">Sedang mendeteksi lokasi kamu...</div>
+    
+    <div id="content" style="display:none;">
         <h1>Jadwal Imsakiyah Ramadhan 1447 H</h1>
         <div class="subtitle">
-            <strong>Wilayah:</strong> Pekanbaru, Riau (0.5071° N, 101.4478° E)<br>
-            <strong>Metode:</strong> Kemenag RI (Subuh 20°, Isya 18°) + Ihtiyat 2 Menit<br>
-            <strong>Mulai:</strong> Kamis, 19 Februari 2026
+            <strong id="location-name">Lokasi Tidak Terdeteksi</strong><br>
+            Metode Kemenag RI • Awal Ramadhan: Kamis, 19 Februari 2026
         </div>
 
-        <table id="jadwalTable">
-            <thead>
-                <tr>
-                    <th>Hari / Tanggal</th>
-                    <th>Imsak</th>
-                    <th>Subuh</th>
-                    <th>Zuhur</th>
-                    <th>Ashar</th>
-                    <th>Maghrib</th>
-                    <th>Isya</th>
-                </tr>
-            </thead>
-            <tbody id="scheduleBody">
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hari / Tanggal</th>
+                        <th>Imsak</th>
+                        <th>Subuh</th>
+                        <th>Zuhur</th>
+                        <th>Ashar</th>
+                        <th>Maghrib</th>
+                        <th>Isya</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleBody"></tbody>
+            </table>
+        </div>
     </div>
+</div>
 
-    <script>
-        // Cek ketersediaan library agar tidak error diam-diam
+<script>
+    // Konfigurasi Default (Jika lokasi ditolak)
+    const DEFAULT_COORDS = { lat: -6.2000, lng: 106.8167 }; // Jakarta
+    const START_DATE = new Date(2026, 1, 19); // 19 Feb 2026
+
+    function init() {
         if (typeof adhan === 'undefined') {
-            document.body.innerHTML = '<h2 style="text-align:center; color:red; margin-top:50px;">Gagal memuat library Adhan.js. Pastikan Anda terhubung ke internet.</h2>';
+            document.getElementById('status-message').innerText = "Error: Pustaka Adhan tidak termuat.";
+            return;
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(onPositionFound, onPositionError);
         } else {
-            // --- 1. KONFIGURASI LOKASI (PEKANBARU) ---
-            const latitude = 0.5071;
-            const longitude = 101.4478;
-            const coordinates = new adhan.Coordinates(latitude, longitude);
+            onPositionError();
+        }
+    }
 
-            // --- 2. KONFIGURASI TANGGAL ---
-            const startDate = new Date(2026, 1, 19); // 19 Februari 2026
+    function onPositionFound(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        updateLocationName(lat, lng);
+        generateSchedule(lat, lng);
+    }
 
-            // --- 3. KONFIGURASI METODE KEMENAG RI ---
-            const params = adhan.CalculationMethod.Singapore();
-            params.fajrAngle = 20;
-            params.ishaAngle = 18;
-            params.madhab = adhan.Madhab.Shafi;
+    function onPositionError() {
+        alert("Akses lokasi ditolak atau tidak tersedia. Menggunakan lokasi default (Jakarta).");
+        document.getElementById('location-name').innerText = "Jakarta (Default)";
+        generateSchedule(DEFAULT_COORDS.lat, DEFAULT_COORDS.lng);
+    }
 
-            // Ihtiyat +2 menit
-            params.adjustments = { fajr: 2, dhuhr: 2, asr: 2, maghrib: 2, isha: 2 };
+    // Fungsi mengambil nama kota (Reverse Geocoding)
+    function updateLocationName(lat, lng) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const city = data.address.city || data.address.town || data.address.village || data.address.county || "Lokasi Anda";
+                document.getElementById('location-name').innerText = `Wilayah: ${city} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('location-name').innerText = `Wilayah: (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            });
+    }
 
-            // --- 4. FUNGSI FORMAT WAKTU (FIX) ---
-            function formatTime(dateObj) {
-                // Menggunakan pemformat waktu bawaan browser untuk zona WIB
-                return new Intl.DateTimeFormat('id-ID', {
-                    timeZone: 'Asia/Jakarta',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                }).format(dateObj);
-            }
+    function generateSchedule(lat, lng) {
+        document.getElementById('status-message').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
 
-            // --- 5. GENERATE JADWAL ---
-            const tbody = document.getElementById('scheduleBody');
-            const daysName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const monthName = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const coords = new adhan.Coordinates(lat, lng);
+        const params = adhan.CalculationMethod.Singapore();
+        params.fajrAngle = 20;
+        params.ishaAngle = 18;
+        params.adjustments = { fajr: 2, dhuhr: 2, asr: 2, maghrib: 2, isha: 2 };
 
-            for (let i = 0; i < 30; i++) {
-                const currentDate = new Date(startDate);
-                currentDate.setDate(startDate.getDate() + i);
+        const tbody = document.getElementById('scheduleBody');
+        tbody.innerHTML = ''; // Bersihkan isi tabel sebelumnya
+        
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
-                const prayerTimes = new adhan.PrayerTimes(coordinates, currentDate, params);
+        function formatTime(dateObj) {
+            return new Intl.DateTimeFormat('id-ID', {
+                hour: '2-digit', minute: '2-digit', hour12: false
+            }).format(dateObj);
+        }
 
-                // Hitung Imsak (Subuh - 10 menit)
-                const imsakTime = new Date(prayerTimes.fajr);
-                imsakTime.setMinutes(imsakTime.getMinutes() - 10);
+        for (let i = 0; i < 30; i++) {
+            let cur = new Date(START_DATE);
+            cur.setDate(START_DATE.getDate() + i);
 
-                // Format Tanggal
-                const dayStr = daysName[currentDate.getDay()];
-                const dateStr = `${currentDate.getDate()} ${monthName[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+            const p = new adhan.PrayerTimes(coords, cur, params);
+            const imsak = new Date(p.fajr);
+            imsak.setMinutes(imsak.getMinutes() - 10);
 
-                // Render Baris
-                const row = `
+            const row = `
                 <tr>
-                    <td style="text-align:left; font-weight:500;">${dayStr}, ${dateStr}</td>
-                    <td class="highlight">${formatTime(imsakTime)}</td>
-                    <td>${formatTime(prayerTimes.fajr)}</td>
-                    <td>${formatTime(prayerTimes.dhuhr)}</td>
-                    <td>${formatTime(prayerTimes.asr)}</td>
-                    <td><strong>${formatTime(prayerTimes.maghrib)}</strong></td>
-                    <td>${formatTime(prayerTimes.isha)}</td>
+                    <td class="date-col">${days[cur.getDay()]}, ${cur.getDate()} ${months[cur.getMonth()]}</td>
+                    <td class="highlight">${formatTime(imsak)}</td>
+                    <td>${formatTime(p.fajr)}</td>
+                    <td>${formatTime(p.dhuhr)}</td>
+                    <td>${formatTime(p.asr)}</td>
+                    <td class="maghrib">${formatTime(p.maghrib)}</td>
+                    <td>${formatTime(p.isha)}</td>
                 </tr>
             `;
-                tbody.innerHTML += row;
-            }
+            tbody.innerHTML += row;
         }
-    </script>
+    }
+
+    // Jalankan saat halaman dimuat
+    init();
+</script>
 
 </body>
-
 </html>
